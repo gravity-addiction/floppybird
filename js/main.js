@@ -43,25 +43,31 @@ var replayclickable = false;
 var endless = false;
 
 //sounds
-var volume = 30;
-var soundJump = new buzz.sound("assets/sounds/sfx_wing.ogg");
-var soundScore = new buzz.sound("assets/sounds/sfx_point.ogg");
-var soundHit = new buzz.sound("assets/sounds/sfx_hit.ogg");
-var soundDie = new buzz.sound("assets/sounds/sfx_die.ogg");
-var soundSwoosh = new buzz.sound("assets/sounds/sfx_swooshing.ogg");
-buzz.all().setVolume(volume);
+var volume = 0;
+var soundJump = { clip: false, start: function() { return new buzz.sound("assets/sounds/sfx_wing.ogg"); }, play: function() { if (volume==0) return; if (!this.clip) { this.clip = this.start(); resetVolume(); } this.clip.play(); } };
+var soundScore = { clip: false, start: function() { return new buzz.sound("assets/sounds/sfx_point.ogg"); }, play: function() { if (volume==0) return; if (!this.clip) { this.clip = this.start(); resetVolume(); } this.clip.play(); } };
+var soundHit = { clip: false, start: function() { return new buzz.sound("assets/sounds/sfx_hit.ogg"); }, play: function() { if (volume==0) return; if (!this.clip) { this.clip = this.start(); resetVolume(); } this.clip.play(); } };
+var soundDie = { clip: false, start: function() { return new buzz.sound("assets/sounds/sfx_die.ogg"); }, play: function() { if (volume==0) return; if (!this.clip) { this.clip = this.start(); resetVolume(); } this.clip.play(); } };
+var soundSwoosh = { clip: false, start: function() { return new buzz.sound("assets/sounds/sfx_swooshing.ogg"); }, play: function() { if (volume==0) return; if (!this.clip) { this.clip = this.start(); resetVolume(); } this.clip.play(); } };
+var resetVolume = function() { buzz.all.setVolume(volume); }
 
 //loops
 var loopGameloop;
 var loopPipeloop;
 
 $(document).ready(function() {
-   if(window.location.search == "?debug")
+   if(window.location.search.indexOf("?debug") > -1)
       debugmode = true;
-   if(window.location.search == "?easy")
+   if(window.location.search.indexOf("?easy") > -1)
       pipeheight = 200;
-   if(window.location.search == "?endless")
+   if(window.location.search.indexOf("?endless") > -1)
       endless = true;
+   if(window.location.search.indexOf("?normal") > -1)
+      endless = false;
+   if(window.location.search.indexOf("?volume=") > -1)
+      volume = window.location.search.substr(Math.round(window.location.search.indexOf("?volume=") + 8),2).replace(/[^0-9.]/g, "");
+   else if(window.location.search.indexOf("?volume") > -1)
+      volume = window.location.search.substr(Math.round(window.location.search.indexOf("?volume=") + 7),2).replace(/[^0-9.]/g, "")
 	  
    //get the highscore
    var savedscore = getCookie("highscore");
@@ -106,7 +112,6 @@ function showSplash()
    $("#player").css({ y: 0, x: 0});
    updatePlayer($("#player"));
    
-   soundSwoosh.stop();
    soundSwoosh.play();
    
    //clear out all the pipes if there are any
@@ -248,10 +253,7 @@ function gameloop() {
    //have we passed the imminent danger?
    if(boxleft > piperight)
    {
-      if (!!endless) {
-        if (nextpipe.hasClass('touched')) playerScore(); else playerScoreFlawless();
-	    nextpipe.remove();
-	  }
+      if (!endless || (!!endless && nextpipe.hasClass('touched'))) playerScore(); else playerScoreFlawless();
 	  
       //yes, remove it
       pipes.splice(0, 1);
@@ -296,7 +298,6 @@ function playerJump()
 {
    velocity = jump;
    //play jump sound
-   soundJump.stop();
    soundJump.play();
 }
 
@@ -379,19 +380,25 @@ function playerDead()
    loopPipeloop = null;
 
    //mobile browsers don't support buzz bindOnce event
-   if(isIncompatible.any())
+   if(volume==0 || isIncompatible.any())
    {
       //skip right to showing score
       showScore();
    }
    else
    {
+      try {
+      if (!soundHit.clip) soundHit.clip = soundHit.start();
+	  if (!soundDie.clip) soundDie.clip = soundDie.start();
+	  
       //play the hit sound (then the dead sound) and then show score
-      soundHit.play().bindOnce("ended", function() {
-         soundDie.play().bindOnce("ended", function() {
+      soundHit.clip.play().bindOnce("ended", function() {
+         soundDie.clip.play().bindOnce("ended", function() {
             showScore();
          });
       });
+	  
+      } catch(err) { showScore(); }
    }
 }
 
@@ -418,7 +425,6 @@ function showScore()
    var wonmedal = setMedal();
    
    //SWOOSH!
-   soundSwoosh.stop();
    soundSwoosh.play();
    
    //show the scoreboard
@@ -426,7 +432,6 @@ function showScore()
    $("#replay").css({ y: '40px', opacity: 0 });
    $("#scoreboard").transition({ y: '0px', opacity: 1}, 600, 'ease', function() {
       //When the animation is done, animate in the replay button and SWOOSH!
-      soundSwoosh.stop();
       soundSwoosh.play();
       $("#replay").transition({ y: '0px', opacity: 1}, 600, 'ease');
       
@@ -449,7 +454,6 @@ $("#replay").click(function() {
    else
       replayclickable = false;
    //SWOOSH!
-   soundSwoosh.stop();
    soundSwoosh.play();
    
    //fade out the scoreboard
@@ -462,7 +466,7 @@ $("#replay").click(function() {
    });
 });
 
- // Added by Gary Taylor, 2/13/14
+// Added by Gary Taylor, 2/13/14
 function playerScoreFlawless()
 {
    score += 99;
@@ -473,7 +477,6 @@ function playerScore()
 {
    score += 1;
    //play score sound
-   soundScore.stop();
    soundScore.play();
    setBigScore();
 }

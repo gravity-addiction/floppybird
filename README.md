@@ -19,6 +19,15 @@ http://nebez.github.io/floppybird/
 Cool Stuff
 ---------
 chrisbeaumont made an awesome auto-pilot, check it out: http://chrisbeaumont.github.io/floppybird/
+gravity-addiction added new game play features and volume control, check it out: http://gravity-addiction.github.io/floppybird/?endless
+
+Controls
+/index.html?easy
+/index.html?endless?volume=10
+--------
+?easy - Easy Mode
+?endless - Almost Endless Gameplay
+?volume - Set volume with value from 0 to 99 after ?volume.. example:  ?volume30  or  ?volume=30
 
 Credits
 ------
