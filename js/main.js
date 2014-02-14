@@ -233,7 +233,7 @@ function gameloop() {
          //no! we touched the pipe
          //playerDead(); // Removed by Gary Taylor, 2/13/14
          //return; // Removed by Gary Taylor, 2/13/14
-		 if (!nextpipe.hasClass('touched')) nextpipe.addClass('touched'); // Added by Gary Taylor, 2/13/14
+		 if (!nextpipe.hasClass('touched')) { $(nextpipe).find('div').each(function() { $(this).css('backgroundColor','red'); }); nextpipe.addClass('touched'); } // Added by Gary Taylor, 2/13/14
       }
    }
    
