@@ -331,6 +331,11 @@ Screen - Game
    animation: animPipe 7500ms linear;
 }
 
+.touched div
+{
+   background-color: red;
+}
+
 .pipe_upper
 {
    position: absolute;

@@ -40,6 +40,8 @@ var pipes = new Array();
 
 var replayclickable = false;
 
+var endless = false;
+
 //sounds
 var volume = 30;
 var soundJump = new buzz.sound("assets/sounds/sfx_wing.ogg");
@@ -58,7 +60,9 @@ $(document).ready(function() {
       debugmode = true;
    if(window.location.search == "?easy")
       pipeheight = 200;
-   
+   if(window.location.search == "?endless")
+      endless = true;
+	  
    //get the highscore
    var savedscore = getCookie("highscore");
    if(savedscore != "")
@@ -231,9 +235,12 @@ function gameloop() {
       else
       {
          //no! we touched the pipe
-         //playerDead(); // Removed by Gary Taylor, 2/13/14
-         //return; // Removed by Gary Taylor, 2/13/14
-		 if (!nextpipe.hasClass('touched')) { $(nextpipe).find('div').each(function() { $(this).css('backgroundColor','red'); }); nextpipe.addClass('touched'); } // Added by Gary Taylor, 2/13/14
+		 if (!endless) { // Player Dies
+           playerDead();
+           return;
+		 } else if (!nextpipe.hasClass('touched')) { // 'touched' class added to pipe
+		   nextpipe.addClass('touched');
+		 }
       }
    }
    
@@ -241,14 +248,16 @@ function gameloop() {
    //have we passed the imminent danger?
    if(boxleft > piperight)
    {
-      if (nextpipe.hasClass('touched')) playerScore(); else playerScoreFlawless(); // Added by Gary Taylor, 2/13/14
-	  nextpipe.remove(); // Added by Gary Taylor, 2/13/14
+      if (!!endless) {
+        if (nextpipe.hasClass('touched')) playerScore(); else playerScoreFlawless();
+	    nextpipe.remove();
+	  }
 	  
       //yes, remove it
       pipes.splice(0, 1);
       
       //and score a point
-      //playerScore(); // Removed by Gary Taylor, 2/13/14
+      if (!endless) playerScore(); // Removed by Gary Taylor, 2/13/14
    }
 }
 
