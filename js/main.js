@@ -231,8 +231,9 @@ function gameloop() {
       else
       {
          //no! we touched the pipe
-         playerDead();
-         return;
+         //playerDead(); // Removed by Gary Taylor, 2/13/14
+         //return; // Removed by Gary Taylor, 2/13/14
+		 if (!nextpipe.hasClass('touched')) nextpipe.addClass('touched'); // Added by Gary Taylor, 2/13/14
       }
    }
    
@@ -240,11 +241,14 @@ function gameloop() {
    //have we passed the imminent danger?
    if(boxleft > piperight)
    {
+      if (nextpipe.hasClass('touched')) playerScore(); else playerScoreFlawless(); // Added by Gary Taylor, 2/13/14
+	  nextpipe.remove(); // Added by Gary Taylor, 2/13/14
+	  
       //yes, remove it
       pipes.splice(0, 1);
       
       //and score a point
-      playerScore();
+      //playerScore(); // Removed by Gary Taylor, 2/13/14
    }
 }
 
@@ -448,6 +452,13 @@ $("#replay").click(function() {
       showSplash();
    });
 });
+
+ // Added by Gary Taylor, 2/13/14
+function playerScoreFlawless()
+{
+   score += 99;
+   playerScore();
+}
 
 function playerScore()
 {
